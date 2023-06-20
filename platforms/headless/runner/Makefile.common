@@ -1,0 +1,56 @@
+
+CXX = g++
+#CXX = clang++
+
+EXE = $(RUNNER_SO)
+
+GIT_VERSION := "$(shell git describe --abbrev=7 --dirty --always --tags)"
+
+EMULATOR_SRC=../../../../src
+EMULATOR_HEADLESS_SRC=../../../headless
+
+RUNNER_SHARED_LIB = ./runner.so
+
+OBJS = $(addsuffix .o, $(basename $(notdir $(SOURCES))))
+
+UNAME_S := $(shell uname -s)
+
+CXXFLAGS = -I../ -I../../
+CXXFLAGS += -Wall -Wextra -Wformat -std=c++11 -DEMULATOR_BUILD=\"$(GIT_VERSION)\"
+LIBS = -lrunner
+
+DEBUG ?= 0
+ifeq ($(DEBUG), 1)
+    CXXFLAGS +=-DDEBUG -g3 -fPIC
+else
+    CXXFLAGS +=-DNDEBUG -O3 -flto -fPIC
+endif
+
+SANITIZE ?= 0
+ifeq ($(SANITIZE), 1)
+	CXXFLAGS +=-fsanitize=address
+    LIBS += -lasan
+endif
+
+##---------------------------------------------------------------------
+## BUILD RULES
+##---------------------------------------------------------------------
+# %.o:./%.cpp
+# 	$(CXX) $(CXXFLAGS) -c -o $@ $<
+ECHO_MESSAGE = $(EXE)
+LDFLAGS = -shared -fPIC -L$(EMULATOR_HEADLESS_SRC)
+
+%.o:$(EMULATOR_SRC)/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+%.o:$(EMULATOR_HEADLESS_SRC)/%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+all: $(EXE)
+	@echo Build complete for $(ECHO_MESSAGE)
+
+$(EXE): $(OBJS)
+	$(CXX) -o $@ $^ $(LDFLAGS) $(LIBS)
+
+clean:
+	rm -f $(EXE) $(OBJS)
