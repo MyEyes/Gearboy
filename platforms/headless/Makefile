@@ -52,7 +52,7 @@ ifeq ($(EXE), gearboy-headless) #HEADLESS
 	LIBS += -lrunner
 	LDFLAGS += -L.
 
-	CXXFLAGS += 
+	CXXFLAGS += -fPIC
 	CFLAGS += $(CXXFLAGS)
 else ifeq ($(UNAME_S), Linux) #LINUX
 	ECHO_MESSAGE = "Linux"

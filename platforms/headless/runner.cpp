@@ -20,21 +20,34 @@ runner_t* runner_create(const char* path)
         Log("Couldn't allocate runner struct");
         return NULL;
     }
+    memset((char*)runner, 0, sizeof(*runner));
     runner->name[0] = 0; //TODO: Set name
     runner->runner_so = runner_so;
     strncpy(runner->path, path, sizeof(runner->path));
-    init_func(&runner->ops);
+    if(init_func(runner)<0)
+    {
+        Log("Failed to initialize runner");
+        return NULL;
+    }
     return runner;
 }
 
 void runner_pre_frame(runner_t* runner, GearboyCore *gearboy)
 {
     if(runner && runner->ops.pre_frame)
-        runner->ops.pre_frame(gearboy);
+        runner->ops.pre_frame(runner, gearboy);
 }
 
 void runner_post_frame(runner_t* runner, GearboyCore *gearboy)
 {
     if(runner && runner->ops.post_frame)
-        runner->ops.post_frame(gearboy);
+        runner->ops.post_frame(runner, gearboy);
+}
+
+void runner_on_input_poll(runner_t* runner, GearboyCore *gearboy)
+{
+    if(runner && runner->ops.on_input_poll)
+    {
+        runner->ops.on_input_poll(runner, gearboy);
+    }
 }

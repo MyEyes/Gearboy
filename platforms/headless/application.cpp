@@ -53,6 +53,11 @@ static Cartridge::CartridgeTypes get_mbc(int index)
     }
 }
 
+static void application_on_input_poll()
+{
+    runner_on_input_poll(runner, emu_get_core());
+}
+
 void load_rom(const char* path)
 {
     emu_resume();
@@ -101,6 +106,7 @@ int application_init(const char* rom, const char* runner_so)
 
     emu_init();
     emu_initialized = true;
+    emu_get_core()->GetInput()->SetPollCallback(application_on_input_poll);
 
     strcpy(emu_savefiles_path, config_emulator.savefiles_path.c_str());
     strcpy(emu_savestates_path, config_emulator.savestates_path.c_str());
@@ -138,19 +144,6 @@ void application_mainloop(void)
 
 static void run_emulator(void)
 {
-    if (!emu_is_empty())
-    {
-        static int i = 0;
-        i++;
-
-        if (i > 20)
-        {
-            i = 0;
-
-            char title[256];
-            sprintf(title, "%s %s - %s", GEARBOY_TITLE, GEARBOY_VERSION, emu_get_core()->GetCartridge()->GetFileName());
-        }
-    }
     config_emulator.paused = emu_is_paused();
     emu_audio_sync = config_audio.sync;
     runner_pre_frame(runner, emu_get_core());

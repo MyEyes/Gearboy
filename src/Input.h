@@ -25,6 +25,8 @@
 class Memory;
 class Processor;
 
+typedef void (*on_input_poll_cb)();
+
 class Input
 {
 public:
@@ -38,6 +40,7 @@ public:
     u8 Read();
     void SaveState(std::ostream& stream);
     void LoadState(std::istream& stream);
+    void SetPollCallback(on_input_poll_cb callback);
 
 private:
     void Update();
@@ -48,6 +51,8 @@ private:
     u8 m_JoypadState;
     u8 m_P1;
     int m_iInputCycles;
+    bool m_inputPolled;
+    on_input_poll_cb m_inputPollCallback;
 };
 
 inline void Input::Tick(unsigned int clockCycles)
@@ -58,8 +63,14 @@ inline void Input::Tick(unsigned int clockCycles)
     if (m_iInputCycles >= 65536)
     {
         m_iInputCycles -= 65536;
+        m_inputPolled = false;
         Update();
     }
+}
+
+inline void Input::SetPollCallback(on_input_poll_cb callback)
+{
+    m_inputPollCallback = callback;
 }
 
 inline void Input::Write(u8 value)
@@ -70,6 +81,15 @@ inline void Input::Write(u8 value)
 
 inline u8 Input::Read()
 {
+    if(!m_inputPolled)
+    {
+        //Can signal input polling here
+        if(m_inputPollCallback)
+        {
+            m_inputPollCallback();
+        }
+    }
+    m_inputPolled = true;
     return m_P1;
 }
 

@@ -11,6 +11,11 @@ EMULATOR_HEADLESS_SRC=../../../headless
 
 RUNNER_SHARED_LIB = ./runner.so
 
+#Need to link against the object files used when building headless
+CORE_SOURCES = $(EMULATOR_SRC)/Audio.cpp $(EMULATOR_SRC)/Cartridge.cpp $(EMULATOR_SRC)/CommonMemoryRule.cpp $(EMULATOR_SRC)/GearboyCore.cpp $(EMULATOR_SRC)/Input.cpp $(EMULATOR_SRC)/IORegistersMemoryRule.cpp $(EMULATOR_SRC)/MBC1MemoryRule.cpp $(EMULATOR_SRC)/MBC2MemoryRule.cpp $(EMULATOR_SRC)/MBC3MemoryRule.cpp $(EMULATOR_SRC)/MBC5MemoryRule.cpp $(EMULATOR_SRC)/Memory.cpp $(EMULATOR_SRC)/MemoryRule.cpp $(EMULATOR_SRC)/MultiMBC1MemoryRule.cpp $(EMULATOR_SRC)/opcodes.cpp $(EMULATOR_SRC)/opcodes_cb.cpp $(EMULATOR_SRC)/Processor.cpp $(EMULATOR_SRC)/RomOnlyMemoryRule.cpp $(EMULATOR_SRC)/Video.cpp
+CORE_SOURCES += $(EMULATOR_AUDIO_SRC)/Blip_Buffer.cpp $(EMULATOR_AUDIO_SRC)/Effects_Buffer.cpp $(EMULATOR_AUDIO_SRC)/Gb_Apu.cpp $(EMULATOR_AUDIO_SRC)/Gb_Apu_State.cpp $(EMULATOR_AUDIO_SRC)/Gb_Oscs.cpp $(EMULATOR_AUDIO_SRC)/Multi_Buffer.cpp
+CORE_OBJS = $(addprefix $(EMULATOR_HEADLESS_SRC)/, $(addsuffix .o, $(basename $(notdir $(CORE_SOURCES)))))
+
 OBJS = $(addsuffix .o, $(basename $(notdir $(SOURCES))))
 
 UNAME_S := $(shell uname -s)
@@ -49,7 +54,8 @@ LDFLAGS = -shared -fPIC -L$(EMULATOR_HEADLESS_SRC)
 all: $(EXE)
 	@echo Build complete for $(ECHO_MESSAGE)
 
-$(EXE): $(OBJS)
+$(EXE): $(OBJS) $(CORE_OBJS)
+	echo $(CORE_OBJS)
 	$(CXX) -o $@ $^ $(LDFLAGS) $(LIBS)
 
 clean:

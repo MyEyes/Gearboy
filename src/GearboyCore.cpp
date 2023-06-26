@@ -281,6 +281,11 @@ Video* GearboyCore::GetVideo()
     return m_pVideo;
 }
 
+Input* GearboyCore::GetInput()
+{
+    return m_pInput;
+}
+
 void GearboyCore::KeyPressed(Gameboy_Keys key)
 {
     m_pInput->KeyPressed(key);

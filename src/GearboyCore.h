@@ -82,6 +82,7 @@ public:
     Processor* GetProcessor();
     Audio* GetAudio();
     Video* GetVideo();
+    Input* GetInput();
 
 private:
     void RenderDMGFrame(u16* pFrameBuffer) const;
